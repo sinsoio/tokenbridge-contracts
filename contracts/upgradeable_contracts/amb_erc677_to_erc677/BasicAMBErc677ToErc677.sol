@@ -254,7 +254,7 @@ contract BasicAMBErc677ToErc677 is
         require(rewardIncome()>=amount,"income is insufficient");
         ERC677 token = erc677token();
         setLock(true);
-        token.transfer(rewarder(), amount);
+        token.safeTransfer(rewarder(), amount);
         _subRewardIncome(amount);
         setLock(false);
     }
