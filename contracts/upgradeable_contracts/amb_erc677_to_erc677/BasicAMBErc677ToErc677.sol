@@ -102,13 +102,17 @@ contract BasicAMBErc677ToErc677 is
     }
 
     function onTokenTransfer(address _from, uint256 _value, bytes _data) external returns (bool) {
+        require(_value>serverFee(),"amount is too small");
         ERC677 token = erc677token();
         require(msg.sender == address(token));
         if (!lock()) {
             require(withinLimit(_value));
             addTotalSpentPerDay(getCurrentDay(), _value);
         }
-        bridgeSpecificActionsOnTokenTransfer(token, _from, _value, _data);
+        if(serverFee()>0){
+            _addRewardIncome(serverFee());
+        }
+        bridgeSpecificActionsOnTokenTransfer(token, _from, _value.sub(serverFee()), _data);
         return true;
     }
 
