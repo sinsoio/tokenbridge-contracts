@@ -6,7 +6,7 @@ interface IHomeBridge {
     function signature(bytes32 _hash, uint256 _index) external view returns (bytes memory);
 }
 
-contract Helper {
+contract Helpers {
     function unpackSignature(bytes memory _signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
         require(_signature.length == 65);
 
@@ -19,7 +19,7 @@ contract Helper {
     }
 }
 
-contract AMBBridgeHelper is Helper {
+contract AMBBridgeHelper is Helpers {
     address public owner;
     IHomeBridge public ambBridge;
 

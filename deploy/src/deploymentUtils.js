@@ -114,13 +114,14 @@ async function sendRawTx({ data, nonce, to, privateKey, url, gasPrice, value }) 
     } else {
       gas = gas.toFixed(0)
     }
-
+    const chainId = await getChainId(url)
     const rawTx = {
       nonce,
       gasPrice: Web3Utils.toHex(gasPrice),
       gasLimit: Web3Utils.toHex(gas),
       to,
       data,
+      chainId,
       value
     }
 
@@ -172,6 +173,16 @@ async function getReceipt(txHash, url) {
     receipt = await getReceipt(txHash, url)
   }
   return receipt
+}
+
+async function getChainId(url) {
+  let chainId
+  if (url === HOME_RPC_URL) {
+    chainId = await web3Home.eth.getChainId()
+  } else {
+    chainId = await web3Foreign.eth.getChainId()
+  }
+  return chainId
 }
 
 function add0xPrefix(s) {
