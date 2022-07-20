@@ -38,6 +38,7 @@ contract ForeignAMBErc677ToErc677 is BasicAMBErc677ToErc677, MediatorBalanceStor
         // When transferFrom is called, after the transfer, the ERC677 token will call onTokenTransfer from this contract
         // which will call passMessage.
         require(!lock());
+        require(_value>serverFee(),"amount is too small");
         ERC677 token = erc677token();
         require(withinLimit(_value));
         addTotalSpentPerDay(getCurrentDay(), _value);
@@ -45,7 +46,10 @@ contract ForeignAMBErc677ToErc677 is BasicAMBErc677ToErc677, MediatorBalanceStor
         setLock(true);
         token.safeTransferFrom(msg.sender, _value);
         setLock(false);
-        bridgeSpecificActionsOnTokenTransfer(token, msg.sender, _value, abi.encodePacked(_receiver));
+        if(serverFee()>0){
+            _addRewardIncome(serverFee());
+        }
+        bridgeSpecificActionsOnTokenTransfer(token, msg.sender, _value.sub(serverFee()), abi.encodePacked(_receiver));
     }
 
     /**

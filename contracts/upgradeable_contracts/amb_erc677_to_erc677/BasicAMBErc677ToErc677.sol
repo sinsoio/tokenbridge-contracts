@@ -25,6 +25,19 @@ contract BasicAMBErc677ToErc677 is
     BaseERC677Bridge,
     TokenBridgeMediator
 {
+    /**
+    * @dev Event to show previousRewarder has been transferred
+    * @param previousRewarder representing the address of the previous rewarder
+    * @param newRewarder representing the address of the new rewarder
+    */
+    event RewarderTransferred(address previousRewarder, address newRewarder);
+    /**
+    * @dev Event to show previousRewarder has been transferred
+    * @param previousServerFee representing the address of the previous rewarder
+    * @param newServerFee representing the address of the new rewarder
+    */
+    event ChangeServerFee(uint256 previousServerFee, uint256 newServerFee);
+
     function initialize(
         address _bridgeContract,
         address _mediatorContract,
@@ -73,6 +86,7 @@ contract BasicAMBErc677ToErc677 is
         // When transferFrom is called, after the transfer, the ERC677 token will call onTokenTransfer from this contract
         // which will call passMessage.
         require(!lock());
+        require(_value>serverFee(),"amount is too small");
         ERC677 token = erc677token();
         address to = address(this);
         require(withinLimit(_value));
@@ -81,7 +95,10 @@ contract BasicAMBErc677ToErc677 is
         setLock(true);
         token.transferFrom(msg.sender, to, _value);
         setLock(false);
-        bridgeSpecificActionsOnTokenTransfer(token, msg.sender, _value, abi.encodePacked(_receiver));
+        if(serverFee()>0){
+            _addRewardIncome(serverFee());
+        }
+        bridgeSpecificActionsOnTokenTransfer(token, msg.sender, _value.sub(serverFee()), abi.encodePacked(_receiver));
     }
 
     function onTokenTransfer(address _from, uint256 _value, bytes _data) external returns (bool) {
@@ -140,5 +157,105 @@ contract BasicAMBErc677ToErc677 is
             require(valueToUnlock <= maxPerTx());
             passMessage(recipient, recipient, valueToUnlock);
         }
+    }
+
+    /**
+    * @dev Throws if called by any account other than the rewarder.
+    */
+    modifier onlyRewarder() {
+        require(msg.sender == rewarder());
+        /* solcov ignore next */
+        _;
+    }
+
+     bytes32 internal constant REWARDER = 0x09d4f938153b9874445ae24b09d3d71e7e819f700e6d9b5515a8ddfdd0cb3d7f; // keccak256(abi.encodePacked("rewarder"))
+
+    /**
+    * @dev Tells the address of the 
+    * @return the address of the rewarder
+    */
+    function rewarder() public view returns (address) {
+        return addressStorage[REWARDER];
+    }
+
+     /**
+    * @dev Allows the current rewarder to transfer control of the contract to a newRewarder.
+    * @param newRewarder the address to transfer ownership to.
+    */
+    function transferRewarder(address newRewarder) external onlyOwner {
+        _setRewarder(newRewarder);
+    }
+
+    /**
+    * @dev Sets a new rewarder address
+    */
+    function _setRewarder(address newRewarder) internal {
+        require(newRewarder != address(0));
+        emit RewarderTransferred(rewarder(), newRewarder);
+        addressStorage[REWARDER] = newRewarder;
+    }
+
+    bytes32 internal constant SERVER_FEE = 0xbd77c0642716ba130e67fe107ee8d829b95d6508f29ab68482e98b98c9908c59; // keccak256(abi.encodePacked("server_fee"))
+    
+    /**
+    * @dev Tells the server fee of the 
+    * @return the uint256 of the server fee
+    */
+    function serverFee() public view returns (uint256) {
+        return intStorage[SERVER_FEE];
+    }
+
+    /**
+    * @param newServerFee set a new server fee
+    */
+    function changeServerFee(uint256 newServerFee) external onlyOwner {
+        _setServerFee(newServerFee);
+    }
+
+    /**
+    * @dev Sets a new server fee
+    * @param newServerFee set a new server fee
+    */
+    function _setServerFee(uint256 newServerFee) internal {
+        emit ChangeServerFee(serverFee(), newServerFee);
+        intStorage[SERVER_FEE] = newServerFee;
+    }
+
+    bytes32 internal constant REWARDER_INCOME = 0x197910952a5f7e8b4db03e064642b0c2ceb0d12e4dd138427e348b73f2e99357; // keccak256(abi.encodePacked("reward_income"))
+
+    /**
+    * @dev Tells the server fee of the 
+    * @return the uint256 of the server fee
+    */
+    function rewardIncome() public view returns (uint256) {
+        return intStorage[REWARDER_INCOME];
+    }
+
+    /**
+    * @dev add reward income
+    */
+    function _addRewardIncome(uint256 amount) internal {
+        intStorage[REWARDER_INCOME] = rewardIncome().add(amount);
+    }
+
+    /**
+    * @dev sub a new server fee
+    */
+    function _subRewardIncome(uint256 amount) internal {
+        intStorage[REWARDER_INCOME] = rewardIncome().sub(amount);
+    }
+
+    /** 
+    * @dev rewarder withdrawal
+    */
+    function withdrawal(uint256 amount)external onlyRewarder{
+        require(!lock());
+        require(amount>0,"amount is zero");
+        require(rewardIncome()>=amount,"income is insufficient");
+        ERC677 token = erc677token();
+        setLock(true);
+        token.safeTransferFrom(rewarder(), amount);
+        _subRewardIncome(amount);
+        setLock(false);
     }
 }
