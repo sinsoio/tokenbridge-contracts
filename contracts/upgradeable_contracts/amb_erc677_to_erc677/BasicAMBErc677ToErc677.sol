@@ -202,7 +202,7 @@ contract BasicAMBErc677ToErc677 is
     * @return the uint256 of the server fee
     */
     function serverFee() public view returns (uint256) {
-        return intStorage[SERVER_FEE];
+        return uintStorage[SERVER_FEE];
     }
 
     /**
@@ -218,7 +218,7 @@ contract BasicAMBErc677ToErc677 is
     */
     function _setServerFee(uint256 newServerFee) internal {
         emit ChangeServerFee(serverFee(), newServerFee);
-        intStorage[SERVER_FEE] = newServerFee;
+        uintStorage[SERVER_FEE] = newServerFee;
     }
 
     bytes32 internal constant REWARDER_INCOME = 0x197910952a5f7e8b4db03e064642b0c2ceb0d12e4dd138427e348b73f2e99357; // keccak256(abi.encodePacked("reward_income"))
@@ -228,21 +228,21 @@ contract BasicAMBErc677ToErc677 is
     * @return the uint256 of the server fee
     */
     function rewardIncome() public view returns (uint256) {
-        return intStorage[REWARDER_INCOME];
+        return uintStorage[REWARDER_INCOME];
     }
 
     /**
     * @dev add reward income
     */
     function _addRewardIncome(uint256 amount) internal {
-        intStorage[REWARDER_INCOME] = rewardIncome().add(amount);
+        uintStorage[REWARDER_INCOME] = rewardIncome().add(amount);
     }
 
     /**
     * @dev sub a new server fee
     */
     function _subRewardIncome(uint256 amount) internal {
-        intStorage[REWARDER_INCOME] = rewardIncome().sub(amount);
+        uintStorage[REWARDER_INCOME] = rewardIncome().sub(amount);
     }
 
     /** 
