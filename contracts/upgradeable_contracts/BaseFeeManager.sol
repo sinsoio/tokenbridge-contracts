@@ -12,7 +12,6 @@ contract BaseFeeManager is EternalStorage, FeeTypes {
     event ForeignFeeUpdated(uint256 fee);
 
     // This is not a real fee value but a relative value used to calculate the fee percentage
-    uint256 internal constant MAX_FEE = 1 ether;
     bytes32 internal constant HOME_FEE_STORAGE_KEY = 0xc3781f3cec62d28f56efe98358f59c2105504b194242dbcb2cc0806850c306e7; // keccak256(abi.encodePacked("homeFee"))
     bytes32 internal constant FOREIGN_FEE_STORAGE_KEY = 0x68c305f6c823f4d2fa4140f9cf28d32a1faccf9b8081ff1c2de11cf32c733efc; // keccak256(abi.encodePacked("foreignFee"))
 
@@ -30,19 +29,10 @@ contract BaseFeeManager is EternalStorage, FeeTypes {
         returns (uint256)
     {
         uint256 fee = _feeType == HOME_FEE ? getHomeFee() : getForeignFee();
-        if (!_recover) {
-            return _value.mul(fee).div(MAX_FEE);
-        }
-        return _value.mul(fee).div(MAX_FEE.sub(fee));
+        return fee;
     }
 
-    modifier validFee(uint256 _fee) {
-        require(_fee < MAX_FEE);
-        /* solcov ignore next */
-        _;
-    }
-
-    function setHomeFee(uint256 _fee) external validFee(_fee) {
+    function setHomeFee(uint256 _fee) external {
         uintStorage[HOME_FEE_STORAGE_KEY] = _fee;
         emit HomeFeeUpdated(_fee);
     }
@@ -51,7 +41,7 @@ contract BaseFeeManager is EternalStorage, FeeTypes {
         return uintStorage[HOME_FEE_STORAGE_KEY];
     }
 
-    function setForeignFee(uint256 _fee) external validFee(_fee) {
+    function setForeignFee(uint256 _fee) external {
         uintStorage[FOREIGN_FEE_STORAGE_KEY] = _fee;
         emit ForeignFeeUpdated(_fee);
     }

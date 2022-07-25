@@ -88,8 +88,8 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
     )} in eth,
   HOME_BRIDGE_OWNER: ${HOME_BRIDGE_OWNER},
   Fee Manager: ${feeManager.options.address},
-  Home Fee: ${homeFeeInWei} which is ${HOME_TRANSACTIONS_FEE * 100}%
-  Foreign Fee: ${foreignFeeInWei} which is ${FOREIGN_TRANSACTIONS_FEE * 100}%,
+  Home Fee: ${homeFeeInWei} which is ${HOME_TRANSACTIONS_FEE}
+  Foreign Fee: ${foreignFeeInWei} which is ${FOREIGN_TRANSACTIONS_FEE},
   FOREIGN_TO_HOME_DECIMAL_SHIFT: ${foreignToHomeDecimalShift}`)
     initializeHomeBridgeData = await bridge.methods
       .rewardableInitialize(
@@ -97,7 +97,6 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
         [HOME_DAILY_LIMIT.toString(), HOME_MAX_AMOUNT_PER_TX.toString(), HOME_MIN_AMOUNT_PER_TX.toString()],
         HOME_GAS_PRICE,
         HOME_REQUIRED_BLOCK_CONFIRMATIONS,
-        BLOCK_REWARD_ADDRESS,
         [FOREIGN_DAILY_LIMIT.toString(), FOREIGN_MAX_AMOUNT_PER_TX.toString()],
         HOME_BRIDGE_OWNER,
         feeManager.options.address,
@@ -126,7 +125,6 @@ async function initializeBridge({ validatorsBridge, bridge, initialNonce }) {
         [HOME_DAILY_LIMIT.toString(), HOME_MAX_AMOUNT_PER_TX.toString(), HOME_MIN_AMOUNT_PER_TX.toString()],
         HOME_GAS_PRICE,
         HOME_REQUIRED_BLOCK_CONFIRMATIONS,
-        BLOCK_REWARD_ADDRESS,
         [FOREIGN_DAILY_LIMIT.toString(), FOREIGN_MAX_AMOUNT_PER_TX.toString()],
         HOME_BRIDGE_OWNER,
         foreignToHomeDecimalShift

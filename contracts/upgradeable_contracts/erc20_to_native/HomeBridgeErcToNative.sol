@@ -52,7 +52,6 @@ contract HomeBridgeErcToNative is
         uint256[3] _dailyLimitMaxPerTxMinPerTxArray, // [ 0 = _dailyLimit, 1 = _maxPerTx, 2 = _minPerTx ]
         uint256 _homeGasPrice,
         uint256 _requiredBlockConfirmations,
-        address _blockReward,
         uint256[2] _foreignDailyLimitForeignMaxPerTxArray, // [ 0 = _foreignDailyLimit, 1 = _foreignMaxPerTx ]
         address _owner,
         int256 _decimalShift
@@ -62,7 +61,6 @@ contract HomeBridgeErcToNative is
             _dailyLimitMaxPerTxMinPerTxArray,
             _homeGasPrice,
             _requiredBlockConfirmations,
-            _blockReward,
             _foreignDailyLimitForeignMaxPerTxArray,
             _owner,
             _decimalShift
@@ -77,7 +75,6 @@ contract HomeBridgeErcToNative is
         uint256[3] _dailyLimitMaxPerTxMinPerTxArray, // [ 0 = _dailyLimit, 1 = _maxPerTx, 2 = _minPerTx ]
         uint256 _homeGasPrice,
         uint256 _requiredBlockConfirmations,
-        address _blockReward,
         uint256[2] _foreignDailyLimitForeignMaxPerTxArray, // [ 0 = _foreignDailyLimit, 1 = _foreignMaxPerTx ]
         address _owner,
         address _feeManager,
@@ -89,7 +86,6 @@ contract HomeBridgeErcToNative is
             _dailyLimitMaxPerTxMinPerTxArray,
             _homeGasPrice,
             _requiredBlockConfirmations,
-            _blockReward,
             _foreignDailyLimitForeignMaxPerTxArray,
             _owner,
             _decimalShift
@@ -131,15 +127,12 @@ contract HomeBridgeErcToNative is
         uint256[3] _dailyLimitMaxPerTxMinPerTxArray, // [ 0 = _dailyLimit, 1 = _maxPerTx, 2 = _minPerTx ]
         uint256 _homeGasPrice,
         uint256 _requiredBlockConfirmations,
-        address _blockReward,
         uint256[2] _foreignDailyLimitForeignMaxPerTxArray, // [ 0 = _foreignDailyLimit, 1 = _foreignMaxPerTx ]
         address _owner,
         int256 _decimalShift
     ) internal {
         require(!isInitialized());
         require(AddressUtils.isContract(_validatorContract));
-        require(_blockReward == address(0) || AddressUtils.isContract(_blockReward));
-
         addressStorage[VALIDATOR_CONTRACT] = _validatorContract;
         uintStorage[DEPLOYED_AT_BLOCK] = block.number;
         _setLimits(_dailyLimitMaxPerTxMinPerTxArray);
