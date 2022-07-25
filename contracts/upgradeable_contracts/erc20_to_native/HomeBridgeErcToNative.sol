@@ -2,7 +2,6 @@ pragma solidity 0.4.24;
 
 import "../../libraries/Message.sol";
 import "../../upgradeability/EternalStorage.sol";
-import "../../interfaces/IBlockReward.sol";
 import "../BasicHomeBridge.sol";
 import "../HomeOverdrawManagement.sol";
 import "./RewardableHomeBridgeErcToNative.sol";
@@ -20,31 +19,29 @@ contract HomeBridgeErcToNative is
     RewardableHomeBridgeErcToNative,
     BlockRewardBridge
 {
-    bytes32 internal constant TOTAL_BURNT_COINS = 0x17f187b2e5d1f8770602b32c1159b85c9600859277fae1eaa9982e9bcf63384c; // keccak256(abi.encodePacked("totalBurntCoins"))
+    bytes32 internal constant TOTAL_COINS = 0x17f187b2e5d1f8770602b32c1159b85c9600859277fae1eaa9982e9bcf633841; // keccak256(abi.encodePacked("totalCoins"))
 
     function() public payable {
         require(msg.data.length == 0);
-        nativeTransfer(msg.sender);
+        if (msg.sender == owner() && msg.value > 0) {
+            setTotalCoins(totalCoins().add(msg.value));
+        } else {
+            nativeTransfer(msg.sender);
+        }
     }
 
     function nativeTransfer(address _receiver) internal {
         require(msg.value > 0);
         require(withinLimit(msg.value));
-        IBlockReward blockReward = blockRewardContract();
-        uint256 totalMinted = blockReward.mintedTotallyByBridge(address(this));
-        uint256 totalBurnt = totalBurntCoins();
-        require(msg.value <= totalMinted.sub(totalBurnt));
+        require(msg.value <= totalCoins());
         addTotalSpentPerDay(getCurrentDay(), msg.value);
         uint256 valueToTransfer = msg.value;
         address feeManager = feeManagerContract();
-        uint256 valueToBurn = msg.value;
         if (feeManager != address(0)) {
             uint256 fee = calculateFee(valueToTransfer, false, feeManager, HOME_FEE);
             valueToTransfer = valueToTransfer.sub(fee);
-            valueToBurn = getAmountToBurn(valueToBurn);
         }
-        setTotalBurntCoins(totalBurnt.add(valueToBurn));
-        address(0).transfer(valueToBurn);
+        setTotalCoins(totalCoins().sub(valueToTransfer));
         emit UserRequestForSignature(_receiver, valueToTransfer);
     }
 
@@ -109,19 +106,12 @@ contract HomeBridgeErcToNative is
     }
 
     function getBridgeMode() external pure returns (bytes4 _data) {
-        return 0x18762d46; // bytes4(keccak256(abi.encodePacked("erc-to-native-core")))
+        return 0x18762d46;
+        // bytes4(keccak256(abi.encodePacked("erc-to-native-core")))
     }
 
-    function blockRewardContract() public view returns (IBlockReward) {
-        return _blockRewardContract();
-    }
-
-    function totalBurntCoins() public view returns (uint256) {
-        return uintStorage[TOTAL_BURNT_COINS];
-    }
-
-    function setBlockRewardContract(address _blockReward) external onlyOwner {
-        _setBlockRewardContract(_blockReward);
+    function totalCoins() public view returns (uint256) {
+        return uintStorage[TOTAL_COINS];
     }
 
     /**
@@ -178,16 +168,15 @@ contract HomeBridgeErcToNative is
     {
         _clearAboveLimitsMarker(_hashMsg, _value);
         addTotalExecutedPerDay(getCurrentDay(), _value);
-        IBlockReward blockReward = blockRewardContract();
-        require(blockReward != address(0));
-        uint256 valueToMint = _shiftValue(_value);
+        uint256 valueToTransfer = _shiftValue(_value);
+        setTotalCoins(totalCoins().add(valueToTransfer));
         address feeManager = feeManagerContract();
         if (feeManager != address(0)) {
-            uint256 fee = calculateFee(valueToMint, false, feeManager, FOREIGN_FEE);
+            uint256 fee = calculateFee(valueToTransfer, false, feeManager, FOREIGN_FEE);
             distributeFeeFromAffirmation(fee, feeManager, _txHash);
-            valueToMint = valueToMint.sub(fee);
+            valueToTransfer = valueToTransfer.sub(fee);
         }
-        blockReward.addExtraReceiver(valueToMint, _recipient);
+        _recipient.transfer(valueToTransfer);
         return true;
     }
 
@@ -205,8 +194,8 @@ contract HomeBridgeErcToNative is
         }
     }
 
-    function setTotalBurntCoins(uint256 _amount) internal {
-        uintStorage[TOTAL_BURNT_COINS] = _amount;
+    function setTotalCoins(uint256 _amount) internal {
+        uintStorage[TOTAL_COINS] = _amount;
     }
 
     /**
