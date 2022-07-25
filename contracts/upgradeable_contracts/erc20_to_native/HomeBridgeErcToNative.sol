@@ -17,7 +17,7 @@ contract HomeBridgeErcToNative is
     HomeOverdrawManagement,
     RewardableHomeBridgeErcToNative
 {
-    bytes32 internal constant TOTAL_COINS = 0x17f187b2e5d1f8770602b32c1159b85c9600859277fae1eaa9982e9bcf633841; // keccak256(abi.encodePacked("totalCoins"))
+    bytes32 internal constant TOTAL_COINS = 0xbb37b609342d767a5224a45defa26fbb0423c115d2fd8cf06287605ce46df75f; // keccak256(abi.encodePacked("totalCoins"))
 
     function() public payable {
         require(msg.data.length == 0);
