@@ -15,6 +15,7 @@ function getContracts() {
     FeeManagerErcToNative: require(`../../build/${buildPath}/FeeManagerErcToNative.json`),
     FeeManagerErcToNativePOSDAO: require(`../../build/${buildPath}/FeeManagerErcToNativePOSDAO.json`),
     HomeBridgeErcToNative: require(`../../build/${buildPath}/HomeBridgeErcToNative.json`),
+    ForeignBridgeErcToNative: require(`../../build/${buildPath}/ForeignBridgeErcToNative.json`),
     BlockRewardMock: require(`../../build/${buildPath}/BlockRewardMock.json`),
     HomeAMB: require(`../../build/${buildPath}/HomeAMB.json`),
     ForeignAMB: require(`../../build/${buildPath}/ForeignAMB`),
