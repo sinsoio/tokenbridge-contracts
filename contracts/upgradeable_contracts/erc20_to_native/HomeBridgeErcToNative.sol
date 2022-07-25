@@ -5,7 +5,6 @@ import "../../upgradeability/EternalStorage.sol";
 import "../BasicHomeBridge.sol";
 import "../HomeOverdrawManagement.sol";
 import "./RewardableHomeBridgeErcToNative.sol";
-import "../BlockRewardBridge.sol";
 
 /**
  * @title HomeBridgeErcToNative
@@ -16,8 +15,7 @@ contract HomeBridgeErcToNative is
     EternalStorage,
     BasicHomeBridge,
     HomeOverdrawManagement,
-    RewardableHomeBridgeErcToNative,
-    BlockRewardBridge
+    RewardableHomeBridgeErcToNative
 {
     bytes32 internal constant TOTAL_COINS = 0x17f187b2e5d1f8770602b32c1159b85c9600859277fae1eaa9982e9bcf633841; // keccak256(abi.encodePacked("totalCoins"))
 
@@ -147,7 +145,6 @@ contract HomeBridgeErcToNative is
         _setLimits(_dailyLimitMaxPerTxMinPerTxArray);
         _setGasPrice(_homeGasPrice);
         _setRequiredBlockConfirmations(_requiredBlockConfirmations);
-        addressStorage[BLOCK_REWARD_CONTRACT] = _blockReward;
         _setExecutionLimits(_foreignDailyLimitForeignMaxPerTxArray);
         _setDecimalShift(_decimalShift);
         _setOwner(_owner);
