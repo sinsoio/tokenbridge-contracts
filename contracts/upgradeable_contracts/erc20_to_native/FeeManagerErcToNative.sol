@@ -11,8 +11,7 @@ contract FeeManagerErcToNative is ValidatorsFeeManager, BlockRewardBridge {
     }
 
     function onAffirmationFeeDistribution(address _rewardAddress, uint256 _fee) internal {
-        IBlockReward blockReward = _blockRewardContract();
-        blockReward.addExtraReceiver(_fee, _rewardAddress);
+        _rewardAddress.transfer(_fee);
     }
 
     function onSignatureFeeDistribution(address _rewardAddress, uint256 _fee) internal {
