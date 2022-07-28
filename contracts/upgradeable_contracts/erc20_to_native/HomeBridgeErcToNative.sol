@@ -103,11 +103,7 @@ contract HomeBridgeErcToNative is
      * @param _to address of the tokens/coins receiver.
      */
     function claimTokens(address _token, address _to) external onlyIfUpgradeabilityOwner {
-        // Since native coins are being minted by the blockReward contract and burned by sending them to the address(0),
-        // they are not locked at the contract during the normal operation. However, they can be still forced into this contract
-        // by using a selfdestruct opcode, or by using this contract address as a coinbase account.
-        // In this case it is necessary to allow claiming native coins back.
-        // Any other erc20 token can be safely claimed as well.
+        require(_token != address(0));
         claimValues(_token, _to);
     }
 
