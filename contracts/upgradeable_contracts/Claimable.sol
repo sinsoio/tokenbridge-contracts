@@ -39,7 +39,7 @@ contract Claimable {
      */
     function claimNativeCoins(address _to) internal {
         uint256 value = address(this).balance;
-        Address.safeSendValue(_to, value);
+        _to.transfer(value);
     }
 
     /**

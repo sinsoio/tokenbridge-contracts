@@ -53,7 +53,6 @@ contract ForeignBridgeErcToNative is ERC20Bridge, OtherSideBridgeStorage {
         uint256 _amount,
         bytes32 /*_txHash*/
     ) internal returns (bool) {
-        addTotalExecutedPerDay(getCurrentDay(), _amount);
         return erc20token().transfer(_recipient, _unshiftValue(_amount));
     }
 

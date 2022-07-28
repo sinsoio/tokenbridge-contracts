@@ -27,15 +27,11 @@ contract BasicForeignBridge is EternalStorage, Validatable, BasicBridge, BasicTo
         bytes32 txHash;
         address contractAddress;
         (recipient, amount, txHash, contractAddress) = Message.parseMessage(message);
-        if (withinExecutionLimit(amount)) {
-            require(contractAddress == address(this));
-            require(!relayedMessages(txHash));
-            setRelayedMessages(txHash, true);
-            require(onExecuteMessage(recipient, amount, txHash));
-            emit RelayedMessage(recipient, amount, txHash);
-        } else {
-            onFailedMessage(recipient, amount, txHash);
-        }
+        require(contractAddress == address(this));
+        require(!relayedMessages(txHash));
+        setRelayedMessages(txHash, true);
+        require(onExecuteMessage(recipient, amount, txHash));
+        emit RelayedMessage(recipient, amount, txHash);
     }
 
     /**

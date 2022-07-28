@@ -1,7 +1,6 @@
 pragma solidity 0.4.24;
 
 import "../../interfaces/IBlockReward.sol";
-import "../../libraries/Address.sol";
 import "../ValidatorsFeeManager.sol";
 import "../BlockRewardBridge.sol";
 
@@ -15,7 +14,6 @@ contract FeeManagerErcToNative is ValidatorsFeeManager, BlockRewardBridge {
     }
 
     function onSignatureFeeDistribution(address _rewardAddress, uint256 _fee) internal {
-        Address.safeSendValue(_rewardAddress, _fee);
+        _rewardAddress.transfer(_fee);
     }
-
 }
