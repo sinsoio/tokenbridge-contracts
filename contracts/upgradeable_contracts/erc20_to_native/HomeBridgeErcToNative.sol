@@ -17,9 +17,7 @@ contract HomeBridgeErcToNative is
 {
     function() public payable {
         require(msg.data.length == 0);
-        if (msg.sender == owner() && address(this).balance == 0) {
-            return;
-        } else {
+        if (msg.sender != owner()) {
             nativeTransfer(msg.sender);
         }
     }
